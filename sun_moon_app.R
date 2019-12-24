@@ -1,6 +1,7 @@
 library(lubridate)
 library(oce)
 library(shiny)
+msg <- function(...) cat(file=stderr(), ...)
 
 locationsText <- "
 name;lon;lat;tz
@@ -100,23 +101,31 @@ server <- function(input, output) {
                     format(day, "%b %d, %Y"),
                     sep="\n"),
               side=3, adj=0, line=-3)
-        mtext("Sun", side=3, adj=1, line=-1, col="red")
+        if (any(is.finite(s$altitude))) {
+            mtext("Sun", side=3, adj=1, line=-1, col="red")
+        } else  {
+            mtext("Sun below horizon", side=3, adj=1, line=-1, col="red")
+        }
         illuminatedFraction <- round(100*mean(m$illuminatedFraction, na.rm=TRUE))
-        if (!is.null(illuminatedFraction)) {
+        if (any(is.finite(m$altitude))) {
             mtext(sprintf("Moon (%.0f%% full)", illuminatedFraction),
                   side=3, adj=1, line=-2, col="blue")
         } else {
-            mtext("Moon", side=3, adj=1, line=-2, col="blue")
+            mtext("Moon below horizon", side=3, adj=1, line=-2, col="blue")
         }
         ## sun-moon distance for eclipse diagnosis
-        mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
-        iNearestApproach <- which.min(mismatch)
-        ## sun diameter 0.54deg
-        if (mismatch[iNearestApproach] <= 0.54)
-            ## mtext(sprintf("ECLIPSE (%.1f deg at %s)", mismatch[iNearestApproach],
-            mtext(sprintf("ECLIPSE at %s", format(s$tlocal[iNearestApproach], "%H:%M")),
-                  side=3, adj=1, line=-3)
-        # mtext(paste(round(mismatch[iNearestApproach], 1), "at", s$tlocal[iNearestApproach]), side=3, adj=1, line=-5)
+        if (any(is.finite(m$azimuth))) {
+            mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
+            mismatch[s$altitude < 0] <- NA # concentrate on visible sky
+            nearestIndex <- which.min(mismatch)
+            if (length(nearestIndex)) {
+                ## sun diameter 0.54deg
+                if (mismatch[nearestIndex] <= 0.54) {
+                    mtext(sprintf("ECLIPSE at %s", format(s$tlocal[nearestIndex], "%H:%M")),
+                          side=3, adj=1, line=-3)
+                }
+            }
+        }
     }, pointsize=16)
 }
 
