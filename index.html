@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta name="dc.creator" content="Dan Kelley">
+        <title>Sun and moon sky traces</title>
+    </head>
+
+    <body>
+
+        <p>This website shows the sun and moon positions in the sky at Halifax,
+        Nova Scotia, for the present day.  The outer circle represents the
+        horizon, and letters indicate (true, not magnetic) directions North,
+        East, etc.  The vertical and horizontal lines intersect at the zenith,
+        i.e. the point directly overhead.  The sun trajectory is drawn in red,
+        while blue is used for the moon.  The numbers indicate the hours of the
+        day, in a 24-hour clock set to local standard time (that is, not taking
+        any account of daylight-savings time shifts).</p>
+
+        <p>The R code to create the graph is <a href="sunmoon_R.php">here</a>.
+        If you would like to explore the variation at other times of the year,
+        or at different locations, type
+        <pre style="color:blue;font-weight:bold;">
+source("http://emit.phys.ocean.dal.ca/~kelley/sunmoon/sun_moon_app.R")
+shinyApp(ui, server)
+        </pre> in an R or RStudio window, and then use the slider and pulldown
+        menus.  (You must first install the R packages <code>shiny</code> and
+        <code>oce</code>, for this to work.) If you would like to have another
+        location added to the pull-down menu, please feel free to email me at
+        <code>dan.kelley@dal.ca</code> and I will add your suggestion.</p>
+
+        <p> Here are some other links that may be of interest:</p>
+        <ul>
+            <li> A <a
+                    href="http://dankelley.github.io/r/2014/03/22/sun-moon.html">blog
+                    item</a> on the methods used here.</li>
+
+            <li> A site showing a daily <a
+                    href="http://emit.phys.ocean.dal.ca/~kelley/analemma">analemma</a>.</li>
+
+            <li> A site showing <a
+                    href="http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle">sun-glare
+                    maps for Halifax</a>.</li>
+        </ul>
+
+        <img src="sunmoon4halifax.png">
+        <!--
+            <img src="sunmoon4toronto.png">
+            <img src="sunmoon4perth.png">
+        -->
+    </body>
+</html>
