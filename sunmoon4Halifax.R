@@ -19,7 +19,12 @@ angles <- function(day=Sys.Date(), tz="UTC", lon=-63.61, lat=44.67, sun=TRUE)
     invisible <- a$altitude < 0
     a$altitude[invisible] <- NA
     a$azimuth[invisible] <- NA
-    list(tlocal=tlocal, tUTC=tUTC, altitude=a$altitude, azimuth=a$azimuth)
+    if (sun) {
+        a$illuminatedFraction <- rep(NA, length(tlocal))
+    } else {
+        a$illuminatedFraction[invisible] <- NA
+    }
+    list(tlocal=tlocal, tUTC=tUTC, altitude=a$altitude, azimuth=a$azimuth, illuminatedFraction=a$illuminatedFraction)
 }
 
 day <- Sys.Date()
@@ -27,9 +32,9 @@ m <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat
 s <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat[w], sun=TRUE)
 
 if (!interactive())
-    png("/Users/kelley/Sites/sunmoon/sunmoon4halifax.png", height=4, width=4, unit="in",
+    png("sunmoon4halifax.png", height=4, width=4, unit="in",
         res=120, pointsize=8)
-par(mar=rep(0.5, 4))
+par(mar=c(0.5, 0.5, 1, 0.5))
 theta <- seq(0, 2*pi, length.out=24 * 10)
 radiusx <- cos(theta)
 radiusy <- sin(theta)
@@ -76,7 +81,8 @@ mtext(paste(locations$name[w],
             sep="\n"),
       side=3, adj=0, line=-3)
 
-mtext("Red sun\nBlue moon\n(Local time)", side=3, adj=1, line=-3)
+mtext(sprintf("Red sun\nBlue moon (%.0f%% full)", round(100*mean(m$illuminatedFraction, na.rm=TRUE))),
+      side=3, adj=1, line=-3)
 if (!interactive())
     dev.off()
 

@@ -17,11 +17,13 @@
         day, in a 24-hour clock set to local standard time (that is, not taking
         any account of daylight-savings time shifts).</p>
 
-        <p>The R code to create the graph is <a href="sunmoon_R.php">here</a>.
+        <p>R code to create this graph and others like it is
+        provided in the <code>sunmoon4Halifax.R</code> script,
+        which is available at <a href="https://github.com/dankelley/sunmoon">GitHub</a>.
         If you would like to explore the variation at other times of the year,
         or at different locations, type
         <pre style="color:blue;font-weight:bold;">
-source("http://emit.phys.ocean.dal.ca/~kelley/sunmoon/sun_moon_app.R")
+source("https://github.com/dankelley/sunmoon/blob/master/sun_moon_app.R")
 shinyApp(ui, server)
         </pre> in an R or RStudio window, and then use the slider and pulldown
         menus.  (You must first install the R packages <code>shiny</code> and
@@ -36,11 +38,12 @@ shinyApp(ui, server)
                     item</a> on the methods used here.</li>
 
             <li> A site showing a daily <a
-                    href="http://emit.phys.ocean.dal.ca/~kelley/analemma">analemma</a>.</li>
+                    href="http://emit.phys.ocean.dal.ca/~kelley/analemma">analemma</a> at Halifax,
+                Nova Scotia, Canada.</li>
 
             <li> A site showing <a
                     href="http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle">sun-glare
-                    maps for Halifax</a>.</li>
+                    maps</a>, again for Halifax.</li>
         </ul>
 
         <img src="sunmoon4halifax.png">

@@ -34,7 +34,12 @@ server <- function(input, output) {
             invisible <- a$altitude < 0
             a$altitude[invisible] <- NA
             a$azimuth[invisible] <- NA
-            list(tlocal=tlocal, tUTC=tUTC, altitude=a$altitude, azimuth=a$azimuth)
+            if (sun) {
+                a$illuminatedFraction <- rep(NA, length(tlocal))
+            } else {
+                a$illuminatedFraction[invisible] <- NA
+            }
+            list(tlocal=tlocal, tUTC=tUTC, altitude=a$altitude, azimuth=a$azimuth, illuminatedFraction=a$illuminatedFraction)
         }
 
         day <- as.POSIXct(paste(input$yearOffset+year0, "-01-01 00:00:00", sep=""), tz="UTC") + (input$dayOfYear - 1) * 86400
@@ -81,11 +86,11 @@ server <- function(input, output) {
         points(sx[ti][ok], sy[ti][ok], pch=20, cex=3, col='white')
         text(sx[ti][ok], sy[ti][ok], (1:23)[ok], cex=3/4)
 
-        ## Indicate approximate orientation of Northwest Arm, of Halifax Harbour.
-        if (w == 1) {
-            nwaAzi <- (90-123) * pi / 180
-            lines(cos(nwaAzi)*c(-1,1), sin(nwaAzi)*c(-1,1), col='gray', lwd=3)
-        }
+        ##OLD ## Indicate approximate orientation of Northwest Arm, of Halifax Harbour.
+        ##OLD if (w == 1) {
+        ##OLD     nwaAzi <- (90-123) * pi / 180
+        ##OLD     lines(cos(nwaAzi)*c(-1,1), sin(nwaAzi)*c(-1,1), col='gray', lwd=3)
+        ##OLD }
 
         ## Marginal legends
         mtext(paste(locations$name[w],
@@ -98,7 +103,8 @@ server <- function(input, output) {
                     sep="\n"),
               side=3, adj=0, line=-3)
         mtext("Sun", side=1, adj=0, line=-3, col="red")
-        mtext("Moon", side=1, adj=0, line=-2, col="blue")
+        mtext(sprintf("Moon (%.0f%% full)", round(100*mean(m$illuminatedFraction, na.rm=TRUE))),
+              side=1, adj=0, line=-2, col="blue")
         mtext("Local Hour", side=1, adj=0, line=-1)
     }, pointsize=16)
 }
