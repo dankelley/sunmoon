@@ -12,8 +12,7 @@ w <- 1 # focus on Halifax
 
 angles <- function(day=Sys.Date(), tz="UTC", lon=-63.61, lat=44.67, sun=TRUE)
 {
-    ##message("day[1]=", day[1], ", tz=", tz, ", lon=", lon, ", lat=", lat, ", sun=", sun)
-    tlocal <- seq(as.POSIXct(paste(day, "00:00:00"), tz=tz), length.out=240, by="6 min")
+    tlocal <- seq(as.POSIXct(paste(day, "00:00:00"), tz=tz), length.out=24*60, by="1 min")
     tUTC <- with_tz(tlocal, "UTC")
     a <- if (sun) sunAngle(tUTC, lon=lon, lat=lat) else moonAngle(tUTC, lon=lon, lat=lat)
     invisible <- a$altitude < 0
@@ -81,8 +80,23 @@ mtext(paste(locations$name[w],
             sep="\n"),
       side=3, adj=0, line=-3)
 
-mtext(sprintf("Red sun\nBlue moon (%.0f%% full)", round(100*mean(m$illuminatedFraction, na.rm=TRUE))),
-      side=3, adj=1, line=-3)
+mtext("Sun", side=3, adj=1, line=-1, col="red")
+illuminatedFraction <- round(100*mean(m$illuminatedFraction, na.rm=TRUE))
+if (!is.null(illuminatedFraction)) {
+    mtext(sprintf("Moon (%.0f%% full)", illuminatedFraction),
+          side=3, adj=1, line=-2, col="blue")
+} else {
+    mtext("Moon", side=3, adj=1, line=-2, col="blue")
+}
+## sun-moon distance for eclipse diagnosis
+mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
+iNearestApproach <- which.min(mismatch)
+## sun diameter 0.54deg
+if (mismatch[iNearestApproach] <= 0.54)
+    ## mtext(sprintf("ECLIPSE (%.1f deg at %s)", mismatch[iNearestApproach],
+    mtext(sprintf("ECLIPSE at %s", format(s$tlocal[iNearestApproach], "%H:%M")),
+          side=3, adj=1, line=-4)
+
 if (!interactive())
     dev.off()
 
