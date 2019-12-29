@@ -8,6 +8,7 @@ name;lon;lat;tz
 Halifax, Canada;-63.61;44.67;America/Halifax
 Chennai, India;80.26;13.08;Asia/Kolkata
 Resolute, Canada;-94.83;74.70;America/Resolute
+San Francisco, USA;-122.3973;37.8030;America/Los_Angeles
 "
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 
