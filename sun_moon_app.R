@@ -10,7 +10,9 @@ Halifax, Canada;-63.61;44.67;America/Halifax
 Chennai, India;80.26;13.08;Asia/Kolkata
 Resolute, Canada;-94.83;74.70;America/Resolute
 San Francisco;-122.3973;37.8030;America/Los_Angeles
-"
+Aranuka Atoll;-173.6295;0.1905;Pacific/Tarawa
+Chuuk, FSM;-151.8470;7.4467;Pacific/Chuuk
+Tok, Alaska;-142.9856;63.3367;America/Anchorage"
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 
 year0 <- as.integer(format(Sys.Date(), "%Y"))
