@@ -6,6 +6,7 @@ name;lon;lat;tz
 Halifax, Canada;-63.61;44.67;America/Halifax
 Chennai, India;80.26;13.08;Asia/Kolkata
 Resolute, Canada;-94.83;74.70;America/Resolute
+San Francisco;-122.3973;37.8030;America/Los_Angeles
 "
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 w <- 1 # focus on Halifax
@@ -88,14 +89,20 @@ if (!is.null(illuminatedFraction)) {
 } else {
     mtext("Moon", side=3, adj=1, line=-2, col="blue")
 }
-## sun-moon distance for eclipse diagnosis
-mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
-iNearestApproach <- which.min(mismatch)
-## sun diameter 0.54deg
-if (mismatch[iNearestApproach] <= 0.54)
-    ## mtext(sprintf("ECLIPSE (%.1f deg at %s)", mismatch[iNearestApproach],
-    mtext(sprintf("ECLIPSE at %s", format(s$tlocal[iNearestApproach], "%H:%M")),
-          side=3, adj=1, line=-4)
+## Do these tests only if the sun or moon are visible above the horizon, i.e.
+## they are ignored in high-latitude winters
+if (any(is.finite(m$azimuth)) || any(is.finite(s$azimuth))) {
+    ## sun-moon distance for eclipse diagnosis
+    mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
+    if (is.finite(mismatch)) {
+        iNearestApproach <- which.min(mismatch)
+        ## sun diameter 0.54deg
+        if (mismatch[iNearestApproach] <= 0.54)
+            ## mtext(sprintf("ECLIPSE (%.1f deg at %s)", mismatch[iNearestApproach],
+            mtext(sprintf("ECLIPSE at %s", format(s$tlocal[iNearestApproach], "%H:%M")),
+                  side=3, adj=1, line=-4)
+    }
+}
 
 if (!interactive())
     dev.off()

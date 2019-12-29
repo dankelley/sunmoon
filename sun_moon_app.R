@@ -1,6 +1,7 @@
 library(lubridate)
 library(oce)
 library(shiny)
+debug <- FALSE                         # set to TRUE while developing
 msg <- function(...) cat(file=stderr(), ...)
 
 locationsText <- "
@@ -8,7 +9,7 @@ name;lon;lat;tz
 Halifax, Canada;-63.61;44.67;America/Halifax
 Chennai, India;80.26;13.08;Asia/Kolkata
 Resolute, Canada;-94.83;74.70;America/Resolute
-San Francisco, USA;-122.3973;37.8030;America/Los_Angeles
+San Francisco;-122.3973;37.8030;America/Los_Angeles
 "
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 
@@ -114,17 +115,31 @@ server <- function(input, output) {
         } else {
             mtext("Moon below horizon", side=3, adj=1, line=-2, col="blue")
         }
-        ## sun-moon distance for eclipse diagnosis
-        if (any(is.finite(m$azimuth))) {
+        ## Do these tests only if the sun or moon are visible above the horizon, i.e.
+        ## they are ignored in high-latitude winters
+        if (any(is.finite(m$azimuth)) || any(is.finite(s$azimuth))) {
+            ## sun-moon distance for eclipse diagnosis
             mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
-            mismatch[s$altitude < 0] <- NA # concentrate on visible sky
-            nearestIndex <- which.min(mismatch)
-            if (length(nearestIndex)) {
-                ## sun diameter 0.54deg
-                if (mismatch[nearestIndex] <= 0.54) {
-                    mtext(sprintf("ECLIPSE at %s", format(s$tlocal[nearestIndex], "%H:%M")),
-                          side=3, adj=1, line=-3)
+            if (any(is.finite(mismatch))) {
+                mismatch[s$altitude < 0] <- NA # concentrate on visible sky
+                nearestIndex <- which.min(mismatch)
+                if (length(nearestIndex)) {
+                    ## sun diameter 0.54deg
+                    if (mismatch[nearestIndex] <= 0.54) {
+                        mtext(sprintf("ECLIPSE at %s", format(s$tlocal[nearestIndex], "%H:%M")),
+                              side=3, adj=1, line=-3)
+                    }
                 }
+            }
+            sunriseAzimuth <- s$azimuth[head(which(is.finite(s$azimuth)), 1)]
+            sunsetAzimuth <- s$azimuth[tail(which(is.finite(s$azimuth)), 1)]
+            dev <- 0.5 * (abs(sunriseAzimuth-90) + abs(sunsetAzimuth-270))
+            if (dev < 0.3)
+                mtext("Equinox", side=3, adj=1, line=-4, font=2)
+            if (debug) {
+                mtext(sprintf("Sunrise azimuth %.1fdeg", sunriseAzimuth), side=3, adj=1, line=-5)
+                mtext(sprintf("Sunset azimuth %.1fdeg", sunsetAzimuth), side=3, adj=1, line=-6)
+                mtext(sprintf("dev %.2fdeg", dev), side=3, adj=1, line=-7)
             }
         }
     }, pointsize=16)
