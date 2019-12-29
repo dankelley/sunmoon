@@ -2,7 +2,7 @@ library(lubridate)
 library(oce)
 library(shiny)
 debug <- FALSE                         # set to TRUE while developing
-msg <- function(...) cat(file=stderr(), ...)
+msg <- function(...) if (debug) cat(file=stderr(), ...)
 
 locationsText <- "
 name;lon;lat;tz
@@ -23,7 +23,7 @@ ui <- pageWithSidebar(headerPanel(h4("Sun and moon sky traces")),
                                                "Day of Year", min=1, max=366, value=day0, step=1),
                                    selectInput("location",
                                                "Location", choices=locations$name, selected=locations$name[1]),
-                                   width=3),
+                                   width=4),
                       mainPanel(plotOutput("sunMoonPlot")))
 
 server <- function(input, output) {
@@ -142,6 +142,18 @@ server <- function(input, output) {
                 mtext(sprintf("dev %.2fdeg", dev), side=3, adj=1, line=-7)
             }
         }
+        ## Solstice
+        earthObliquity <- 23.43669     # https://en.wikipedia.org/wiki/Axial_tilt as of 2019-12-29
+        noonSolarAltitude <- max(s$altitude, na.rm=TRUE)
+        msg(vectorShow(noonSolarAltitude))
+        winterSolsticeSolarAltitude <- 90 - (locations$la[w] + earthObliquity)
+        msg(vectorShow(winterSolsticeSolarAltitude))
+        summerSolsticeSolarAltitude <- 90 - (locations$lat[w] - earthObliquity)
+        msg(vectorShow(summerSolsticeSolarAltitude))
+        if (abs(noonSolarAltitude - winterSolsticeSolarAltitude) < 0.00155)
+            mtext("Winter Solstice", side=3, adj=1, line=-4, font=2)
+        if (abs(noonSolarAltitude - summerSolsticeSolarAltitude) < 0.002)
+            mtext("Spring Solstice", side=3, adj=1, line=-4, font=2)
     }, pointsize=16)
 }
 
