@@ -1,15 +1,79 @@
 library(lubridate)
 library(oce)
 
+debug <- FALSE                         # set to TRUE while developing
+msg <- function(...) if (debug) cat(file=stderr(), ...)
+colMoon <- rgb(245/255,199/255,16/255)
+colSun <- "red"
+
 locationsText <- "
 name;lon;lat;tz
 Halifax, Canada;-63.61;44.67;America/Halifax
 Chennai, India;80.26;13.08;Asia/Kolkata
 Resolute, Canada;-94.83;74.70;America/Resolute
 San Francisco;-122.3973;37.8030;America/Los_Angeles
-"
+Aranuka Atoll;-173.6295;0.1905;Pacific/Tarawa
+Chuuk, FSM;-151.8470;7.4467;Pacific/Chuuk
+Tok, Alaska;-142.9856;63.3367;America/Anchorage"
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
-w <- 1 # focus on Halifax
+locations <- locations[order(locations$name),]
+halifax <- grep("Halifax, Canada", locations$name)
+
+
+#' Draw the moon showing bight and shadow regions
+#'
+#' @param phase numeric value, ranging continuously from
+#' 0 for the (dark) new moon, 1/4 for quarter moon (right side
+#' lit), 1/2 for full moon, 3/4 for three-quarter moon (left
+#' side lit, and 1 for new moon again.
+#'
+#' @param lit colour used for the lit portion (defaults to a yellow).
+#'
+#' @param shadow colour used for the shadowed portion (defaults to a light gray).
+#'
+#' @param text character value, to draw at the moon centre (mainly for debugging).
+#'
+#' @param write logical value indicating whether to write the polygon for
+#' the lit portion to a text file with a name constructed by pasting together
+#' `phase_`, the phase to two digits, and `.dat`.
+drawMoon <- function(phase,
+                     lit=rgb(245/255,199/255,16/255),
+                     shadow=rgb(230/255,230/255,230/255),
+                     text="",
+                     write=FALSE)
+{
+    ## orthographic projection
+    XY <- function(lon, lat, R=1)
+    {
+        lambda <- pi * lon / 180
+        phi <- pi * lat / 180
+        x <- R * cos(phi) * sin(lambda)
+        y <- R * sin(phi)
+        list(x=x, y=y)
+    }
+    shadowLongitude <- 90 - 360 * (1 - phase)     # shadow longitude
+    plot(c(-1,1), c(-1,1), xlab="", ylab="", axes=FALSE, asp=1, type="n")
+    lat <- seq(-90, 90, 1)
+    theta <- seq(0, 2*pi, pi/64)
+    polygon(cos(theta), sin(theta), col=shadow)
+    lhs <- XY(rep(-90, length(lat)), rev(lat))
+    rhs <- XY(rep(90, length(lat)), rev(lat))
+    if (shadowLongitude == -90) { # full moon
+        xy <- XY(rep(shadowLongitude, length(lat)), lat)
+        p <- data.frame(x=c(lhs$x, rev(rhs$x)), y=c(lhs$y, rev(rhs$y)))
+    } else if (shadowLongitude < -90) {
+        xy <- XY(rep(-shadowLongitude, length(lat)), lat)
+        p <- data.frame(x=c(lhs$x, xy$x), y=c(lhs$y, xy$y))
+    } else {
+        xy <- XY(rep(shadowLongitude, length(lat)), lat)
+        p <- data.frame(x=c(xy$x, rhs$x), y=c(xy$y, rhs$y))
+    }
+    polygon(p, col=lit)
+    if (write)
+        write.table(round(p, 5), sprintf("phase_%.4f.dat", phase), row.names=FALSE)
+    if (nchar(text) > 0)
+        text(0, 0, text, cex=0.8)
+}
 
 angles <- function(day=Sys.Date(), tz="UTC", lon=-63.61, lat=44.67, sun=TRUE)
 {
@@ -28,8 +92,8 @@ angles <- function(day=Sys.Date(), tz="UTC", lon=-63.61, lat=44.67, sun=TRUE)
 }
 
 day <- Sys.Date()
-m <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat[w], sun=FALSE)
-s <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat[w], sun=TRUE)
+m <- angles(day=day, tz=locations$tz[halifax], lon=locations$lon[halifax], lat=locations$lat[halifax], sun=FALSE)
+s <- angles(day=day, tz=locations$tz[halifax], lon=locations$lon[halifax], lat=locations$lat[halifax], sun=TRUE)
 
 if (!interactive())
     png("sunmoon4halifax.png", height=4, width=4, unit="in",
@@ -52,9 +116,9 @@ text( D,  0, "E", xpd=TRUE)
 ## Moon trace
 mx <- (90 - m$altitude) / 90 * cos(pi / 180 * (90 - m$azimuth))
 my <- (90 - m$altitude) / 90 * sin(pi / 180 * (90 - m$azimuth))
-lines(mx, my, col='blue', lwd=3)
+lines(mx, my, col=colMoon, lwd=4)
 ## Moon labels
-mlt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[w])
+mlt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[halifax])
 ti <- unlist(lapply(mlt, function(X) which.min(abs(X-m$tlocal))))
 ok <- abs(m$tlocal[ti] - mlt) < 10 # avoid overdrawing endpoints
 points(mx[ti][ok], my[ti][ok], pch=20, cex=3, col='white')
@@ -63,46 +127,83 @@ text(mx[ti][ok], my[ti][ok], 1:23, cex=3/4)
 ## Sun trace
 sx <- (90 - s$altitude) / 90 *  cos(pi / 180 * (90 - s$azimuth))
 sy <- (90 - s$altitude) / 90 *  sin(pi / 180 * (90 - s$azimuth))
-lines(sx, sy, col='red', lwd=3)
+lines(sx, sy, col=colSun, lwd=4)
 ## Sun labels
-slt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[w])
+slt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[halifax])
 si <- unlist(lapply(slt, function(X) which.min(abs(X-s$tlocal))))
 ok <- abs(s$tlocal[ti] - slt) < 10 # avoid overdrawing endpoints
 points(sx[ti][ok], sy[ti][ok], pch=20, cex=3, col='white')
 text(sx[ti][ok], sy[ti][ok], 1:23, cex=3/4)
 
-mtext(paste(locations$name[w],
-            paste(abs(locations$lon[w]),
-                  if (locations$lon[w] < 0) "W " else "E ",
-                  abs(locations$lat[w]),
-                  if (locations$lat[w] < 0) "S" else "N",
+## Location/time legend in top-left corner
+mtext(paste(locations$name[halifax],
+            paste(abs(locations$lon[halifax]),
+                  if (locations$lon[halifax] < 0) "W " else "E ",
+                  abs(locations$lat[halifax]),
+                  if (locations$lat[halifax] < 0) "S" else "N",
                   sep=""),
             format(day, "%b %d, %Y"),
             sep="\n"),
       side=3, adj=0, line=-3)
 
-mtext("Sun", side=3, adj=1, line=-1, col="red")
-illuminatedFraction <- round(100*mean(m$illuminatedFraction, na.rm=TRUE))
-if (!is.null(illuminatedFraction)) {
-    mtext(sprintf("Moon (%.0f%% full)", illuminatedFraction),
-          side=3, adj=1, line=-2, col="blue")
+## Trace-colour legend in top-right corner
+if (any(is.finite(s$altitude))) {
+    mtext("Sun Trajectory", side=3, adj=1, line=-1, col=colSun, font=2)
+} else  {
+    mtext("Sun below horizon", side=3, adj=1, line=-1, col=colSun)
+}
+if (any(is.finite(m$altitude))) {
+    mtext("Moon Trajectory", side=3, adj=1, line=-2, col=colMoon, font=2)
 } else {
-    mtext("Moon", side=3, adj=1, line=-2, col="blue")
+    mtext("Moon below horizon", side=3, adj=1, line=-2, col=colMoon)
 }
-## Do these tests only if the sun or moon are visible above the horizon, i.e.
-## they are ignored in high-latitude winters
+
+## Check for eclipse, equinox, and solstice (but only if sun and moon are visible)
 if (any(is.finite(m$azimuth)) || any(is.finite(s$azimuth))) {
-    ## sun-moon distance for eclipse diagnosis
+    ## Eclipse based on sun-moon distance
     mismatch <- sqrt((m$azimuth - s$azimuth)^2 + (m$altitude - s$altitude)^2)
-    if (is.finite(mismatch)) {
-        iNearestApproach <- which.min(mismatch)
-        ## sun diameter 0.54deg
-        if (mismatch[iNearestApproach] <= 0.54)
-            ## mtext(sprintf("ECLIPSE (%.1f deg at %s)", mismatch[iNearestApproach],
-            mtext(sprintf("ECLIPSE at %s", format(s$tlocal[iNearestApproach], "%H:%M")),
-                  side=3, adj=1, line=-4)
+    if (any(is.finite(mismatch))) {
+        mismatch[s$altitude < 0] <- NA # concentrate on visible sky
+        nearestApproachIndex <- which.min(mismatch)
+        if (length(nearestApproachIndex)) {
+            if (mismatch[nearestApproachIndex] <= 0.54) { # sun diameter 0.54deg
+                mtext(sprintf("ECLIPSE at %s", format(s$tlocal[nearestApproachIndex], "%H:%M")),
+                      side=3, adj=1, line=-4)
+            }
+        }
     }
+    ## Equinox
+    sunriseAzimuth <- s$azimuth[head(which(is.finite(s$azimuth)), 1)]
+    sunsetAzimuth <- s$azimuth[tail(which(is.finite(s$azimuth)), 1)]
+    dev <- 0.5 * (abs(sunriseAzimuth-90) + abs(sunsetAzimuth-270))
+    if (dev < 0.3)
+        mtext("Equinox", side=3, adj=1, line=-4, font=2)
+    if (debug) {
+        mtext(sprintf("Sunrise azimuth %.1fdeg", sunriseAzimuth), side=3, adj=1, line=-5)
+        mtext(sprintf("Sunset azimuth %.1fdeg", sunsetAzimuth), side=3, adj=1, line=-6)
+        mtext(sprintf("dev %.2fdeg", dev), side=3, adj=1, line=-7)
+    }
+    ## Solstice
+    earthObliquity <- 23.43669     # https://en.wikipedia.org/wiki/Axial_tilt as of 2019-12-29
+    noonSolarAltitude <- max(s$altitude, na.rm=TRUE)
+    msg(vectorShow(noonSolarAltitude))
+    winterSolsticeSolarAltitude <- 90 - (locations$la[halifax] + earthObliquity)
+    msg(vectorShow(winterSolsticeSolarAltitude))
+    summerSolsticeSolarAltitude <- 90 - (locations$lat[halifax] - earthObliquity)
+    msg(vectorShow(summerSolsticeSolarAltitude))
+    if (abs(noonSolarAltitude - winterSolsticeSolarAltitude) < 0.00155)
+        mtext("Winter Solstice", side=3, adj=1, line=-4, font=2)
+    if (abs(noonSolarAltitude - summerSolsticeSolarAltitude) < 0.002)
+        mtext("Spring Solstice", side=3, adj=1, line=-4, font=2)
 }
+
+## Draw moon-phase diagram, with margin text for % illuminated
+par(new=TRUE, mar=c(0,26,26,1))
+noon <- as.POSIXct(paste(format(day, "%Y-%m-%d"), "12:00:00"), tz="UTC")
+ma <- moonAngle(noon)
+drawMoon(ma$phase, lit=colMoon)
+mtext(paste0("Moon\n", round(100*ma$illuminatedFraction),
+             "% full\nat 12:00 UTC"), cex=1, col=colMoon, font=2)
 
 if (!interactive())
     dev.off()
