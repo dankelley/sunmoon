@@ -1,0 +1,44 @@
+---
+title: "Sun and Moon Trajectories for Halifax, Nova Scotia"
+author: "Dan Kelley"
+date: '2020-01-03'
+---
+
+This website shows the sun and moon positions in the sky at Halifax, Nova
+Scotia, Canada, for the present day.  The outer circle represents the horizon, and
+letters indicate (true, not magnetic) directions North, East, etc.  The
+vertical and horizontal lines intersect at the zenith, i.e. the point directly
+overhead.  The sun and moon trajectories are drawn in different colours, as
+indicated in the top-right corner.  The numbers on the trajectories indicate
+the hours of the day, in a 24-hour clock set to local standard time (that is,
+not taking any account of daylight-savings time shifts). The small diagram
+drawn in the bottom-right corner indicates the phase of the moon.
+
+R code to create this graph and others like it is provided in an R script named
+`sunmoon4Halifax.R` that may be found at https://github.com/dankelley/sunmoon,
+along with related items. One of those related items is an R "shiny app", which
+provides similar calculations for a variety of places in the world, at a day
+that you can specify easily.  You may download this and run it directly, but an
+easier method is just to copy and paste the following into an R or RStudio
+console.
+
+```R
+source("https://raw.githubusercontent.com/dankelley/sunmoon/master/sun_moon_app.R")
+shinyApp(ui, server)
+```
+(You must first install the R packages `shiny` and `oce`, for this to work.) If
+you would like to have another location added to the pull-down menu, please
+email me at <code>dan.kelley@dal.ca</code> and I will add your suggestion.
+
+
+Here are some other links that might be of interest:
+
+* http://dankelley.github.io/r/2014/03/22/sun-moon.html is a blog item relating
+  to the methods employed here.
+
+* http://emit.phys.ocean.dal.ca/~kelley/analemma shows an analemma for Halifax.
+* http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle is a site showing sunrise
+and sunset glare maps for Halifax.
+
+![](sunmoon4halifax.png)
+
