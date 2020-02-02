@@ -23,6 +23,7 @@ easier method is just to copy and paste the following into an R or RStudio
 console.
 
 ```R
+source("https://raw.githubusercontent.com/dankelley/sunmoon/master/drawMoon.R")
 source("https://raw.githubusercontent.com/dankelley/sunmoon/master/sun_moon_app.R")
 shinyApp(ui, server)
 ```

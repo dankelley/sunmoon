@@ -11,11 +11,11 @@ following 'crontab' entry.
 2. Supply an R shiny script that lets the user alter the day of prediction.
 As noted on the website, this can be run by
 ```
-source("http://emit.phys.ocean.dal.ca/~kelley/sunmoon/drawMoon.R")
-source("http://emit.phys.ocean.dal.ca/~kelley/sunmoon/sun_moon_app.R")
+source("https://raw.githubusercontent.com/dankelley/sunmoon/master/drawMoon.R")
+source("https://raw.githubusercontent.com/dankelley/sunmoon/master/sun_moon_app.R")
 shinyApp(ui, server)
 ```
-although users may find it preferable to use a local file from a clone of this
+although users may find it preferable to use local files from a clone of this
 github repository.
 
 
