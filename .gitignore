@@ -3,3 +3,4 @@
 *.swp
 .Rhistory
 *.out
+.DS_Store
