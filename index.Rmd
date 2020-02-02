@@ -28,7 +28,7 @@ shinyApp(ui, server)
 ```
 (You must first install the R packages `shiny` and `oce`, for this to work.) If
 you would like to have another location added to the pull-down menu, please
-email me at <code>dan.kelley@dal.ca</code> and I will add your suggestion.
+email me at `dan.kelley@dal.ca` and I will add your suggestion.
 
 
 Here are some other links that might be of interest:
