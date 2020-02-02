@@ -1,5 +1,6 @@
 library(lubridate)
 library(oce)
+source("drawMoon.R")
 
 debug <- FALSE                         # set to TRUE while developing
 msg <- function(...) if (debug) cat(file=stderr(), ...)
@@ -18,62 +19,6 @@ Tok, Alaska;-142.9856;63.3367;America/Anchorage"
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 locations <- locations[order(locations$name),]
 halifax <- grep("Halifax, Canada", locations$name)
-
-
-#' Draw the moon showing bight and shadow regions
-#'
-#' @param phase numeric value, ranging continuously from
-#' 0 for the (dark) new moon, 1/4 for quarter moon (right side
-#' lit), 1/2 for full moon, 3/4 for three-quarter moon (left
-#' side lit, and 1 for new moon again.
-#'
-#' @param lit colour used for the lit portion (defaults to a yellow).
-#'
-#' @param shadow colour used for the shadowed portion (defaults to a light gray).
-#'
-#' @param text character value, to draw at the moon centre (mainly for debugging).
-#'
-#' @param write logical value indicating whether to write the polygon for
-#' the lit portion to a text file with a name constructed by pasting together
-#' `phase_`, the phase to two digits, and `.dat`.
-drawMoon <- function(phase,
-                     lit=rgb(245/255,199/255,16/255),
-                     shadow=rgb(230/255,230/255,230/255),
-                     text="",
-                     write=FALSE)
-{
-    ## orthographic projection
-    XY <- function(lon, lat, R=1)
-    {
-        lambda <- pi * lon / 180
-        phi <- pi * lat / 180
-        x <- R * cos(phi) * sin(lambda)
-        y <- R * sin(phi)
-        list(x=x, y=y)
-    }
-    shadowLongitude <- 90 - 360 * (1 - phase)     # shadow longitude
-    plot(c(-1,1), c(-1,1), xlab="", ylab="", axes=FALSE, asp=1, type="n")
-    lat <- seq(-90, 90, 1)
-    theta <- seq(0, 2*pi, pi/64)
-    polygon(cos(theta), sin(theta), col=shadow)
-    lhs <- XY(rep(-90, length(lat)), rev(lat))
-    rhs <- XY(rep(90, length(lat)), rev(lat))
-    if (shadowLongitude == -90) { # full moon
-        xy <- XY(rep(shadowLongitude, length(lat)), lat)
-        p <- data.frame(x=c(lhs$x, rev(rhs$x)), y=c(lhs$y, rev(rhs$y)))
-    } else if (shadowLongitude < -90) {
-        xy <- XY(rep(-shadowLongitude, length(lat)), lat)
-        p <- data.frame(x=c(lhs$x, xy$x), y=c(lhs$y, xy$y))
-    } else {
-        xy <- XY(rep(shadowLongitude, length(lat)), lat)
-        p <- data.frame(x=c(xy$x, rhs$x), y=c(xy$y, rhs$y))
-    }
-    polygon(p, col=lit)
-    if (write)
-        write.table(round(p, 5), sprintf("phase_%.4f.dat", phase), row.names=FALSE)
-    if (nchar(text) > 0)
-        text(0, 0, text, cex=0.8)
-}
 
 angles <- function(day=Sys.Date(), tz="UTC", lon=-63.61, lat=44.67, sun=TRUE)
 {
@@ -201,7 +146,7 @@ if (any(is.finite(m$azimuth)) || any(is.finite(s$azimuth))) {
 par(new=TRUE, mar=c(0,26,26,1))
 noon <- as.POSIXct(paste(format(day, "%Y-%m-%d"), "12:00:00"), tz="UTC")
 ma <- moonAngle(noon)
-drawMoon(ma$phase, lit=colMoon)
+drawMoon(ma$phase)
 mtext(paste0("Moon\n", round(100*ma$illuminatedFraction),
              "% full\nat 12:00 UTC"), cex=1, col=colMoon, font=2)
 
