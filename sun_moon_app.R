@@ -1,7 +1,8 @@
 library(lubridate)
 library(oce)
 library(shiny)
-source("drawMoon.R")
+if (file.exists("drawMoon.R"))
+    source("drawMoon.R")
 debug <- FALSE                         # set to TRUE while developing
 msg <- function(...) if (debug) cat(file=stderr(), ...)
 colMoon <- rgb(245/255,199/255,16/255)
