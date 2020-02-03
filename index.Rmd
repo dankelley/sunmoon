@@ -1,7 +1,6 @@
 ---
 title: "Sun and Moon Trajectories for Halifax, Nova Scotia"
 author: "Dan Kelley"
-date: '2020-01-03'
 ---
 
 This website shows the sun and moon positions in the sky at Halifax, Nova
