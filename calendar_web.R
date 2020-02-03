@@ -34,13 +34,14 @@ calendar <- function(year, month,
             par(new=TRUE)
             ma <- moonAngle(t, longitude=longitude, latitude=latitude)
             drawMoon(ma$phase, lit=lit, shadow=shadow)
-            text(0,0.5,format(t, "%a\n%b %d\n%Y"), pos=1, font=2)
+            text(0,0.6,format(t, "%a\n%b %d\n%Y"), pos=1, font=2)
         }
     }
 }
 if (!interactive())
-    png("/Users/kelley/Sites/moon_calendar/calendar.png", height=4.5, width=5.5, unit="in",
-        res=120, pointsize=12)
+    png("/Users/kelley/Sites/moon_calendar/calendar.png",
+        height=4.0, width=5.6, unit="in",
+        res=120, pointsize=13)
 calendar(lit="#FFDC00", shadow="#AAAAAA")
 if (!interactive())
     dev.off()
