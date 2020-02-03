@@ -40,5 +40,5 @@ Here are some other links that might be of interest:
 * http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle is a site showing sunrise
 and sunset glare maps for Halifax.
 
-sunmoon4halifax.png
+img src="sunmoon4halifax.png" alt="ERROR: sunmoon4halifax.png is not available"
 
