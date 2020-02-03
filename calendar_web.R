@@ -15,7 +15,7 @@ calendar <- function(year, month,
                      longitude=-63.61, latitude=44.67,
                      lit=rgb(200/255,150/255,10/255), shadow=gray(0.5))
 {
-    par(mfrow=c(5,7), mar=rep(0.2, 4))
+    par(mfrow=c(6,7), mar=rep(0.2, 4))
     if (missing(year))
         year <- as.integer(format(Sys.Date(), "%Y"))
     if (missing(month))
@@ -40,7 +40,7 @@ calendar <- function(year, month,
 }
 if (!interactive())
     png("/Users/kelley/Sites/moon_calendar/calendar.png",
-        height=4.0, width=5.6, unit="in",
+        height=4.8, width=5.6, unit="in",
         res=120, pointsize=13)
 calendar(lit="#FFDC00", shadow="#AAAAAA")
 if (!interactive())
