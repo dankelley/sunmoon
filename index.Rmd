@@ -35,7 +35,8 @@ Here are some other links that might be of interest:
 
 * http://dankelley.github.io/r/2014/03/22/sun-moon.html is a blog item relating
   to the methods employed here.
-
+* http://emit.phys.ocean.dal.ca/~kelley/moon_calendar shows moon phase for the
+current month
 * http://emit.phys.ocean.dal.ca/~kelley/analemma shows an analemma for Halifax.
 * http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle is a site showing sunrise
 and sunset glare maps for Halifax.

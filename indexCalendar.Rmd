@@ -1,0 +1,23 @@
+---
+title: "Moon Phase Calendar"
+author: "Dan Kelley"
+---
+
+This website shows the moon phase for the persent month, as predicted for the
+sky at Halifax, Nova Scotia, Canada.  Note that the diagrams do not indicate
+the tilt of the arc.
+
+R code to create this graph and others like it is provided in an R script named
+`calendar_web.R` that may be found at https://github.com/dankelley/sunmoon,
+along with related items.
+
+Here are some other links that might be of interest:
+
+* http://emit.phys.ocean.dal.ca/~kelley/sunmoon shows the paths of the sun and
+the moon for the present day, at Halifax.
+* http://emit.phys.ocean.dal.ca/~kelley/analemma shows an analemma for Halifax.
+* http://emit.phys.ocean.dal.ca/~kelley/sunrise_angle is a site showing sunrise
+and sunset glare maps for Halifax.
+
+img src="calendar.png" alt="ERROR: calendar.png is not available"
+
