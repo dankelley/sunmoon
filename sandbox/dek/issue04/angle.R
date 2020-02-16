@@ -65,17 +65,16 @@ mtext(paste0(format(t), ", chi=", round(chi,1)), line=-1)
 ## https://www.youtube.com/watch?v=zdTpIGHIBSU
 ## angle to horizon 84.62 deg (illum limb facing horizon)
 t <- as.POSIXct("2013-02-18 03:37:00", tz="UTC")
-lon <- -83
-lat <- 27
-ma <- moonAngle(t, lon=lon, lat=lat)
-chi <- moonRotationAngleNEW(t, lon=lon, lat=lat)
-180-chi
-ma
+ma <- moonAngle(t, lon=-83, lat=27)
+chi <- moonRotationAngleNEW(t, lon=-83, lat=27)
 
-t <- as.POSIXct(Sys.time(), tz="UTC")
+#lon <- 0
+#lat <- -40
+t<-  lubridate::with_tz(Sys.time(), "UTC")
 chi <- moonRotationAngleNEW(t, lon=lon, lat=lat)
-ma <- moonAngle(t, lon=lon, lat=lat)
-drawMoon(ma$phase, angle=chi-90)
+ma <- moonAngle(t, longitude=lon, latitude=lat)
+drawMoon(phase=ma$phase, angle=chi-90)
 IF <- ma$illuminatedFraction
 mtext(format(t), adj=0, line=-0.5)
 mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
+mtext(paste0("lon=", lon, ", lat=", lat), adj=0, side=1, line=-0.5)
