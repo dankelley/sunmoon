@@ -71,3 +71,11 @@ ma <- moonAngle(t, lon=lon, lat=lat)
 chi <- moonRotationAngleNEW(t, lon=lon, lat=lat)
 180-chi
 ma
+
+t <- as.POSIXct(Sys.time(), tz="UTC")
+chi <- moonRotationAngleNEW(t, lon=lon, lat=lat)
+ma <- moonAngle(t, lon=lon, lat=lat)
+drawMoon(ma$phase, angle=chi-90)
+IF <- ma$illuminatedFraction
+mtext(format(t), adj=0, line=-0.5)
+mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
