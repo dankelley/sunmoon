@@ -1,3 +1,29 @@
+#' Moon rotation angle, from ch13 of Meeus book
+#'
+#' @param time
+#' @param longitude
+#' @param latitude
+#' @references
+#' * https://en.wikipedia.org/wiki/Position_of_the_Sun
+#' * http://www.jgiesen.de/elevaz/basics/meeus.htm
+moonRotationAngle <- function(t=as.POSIXct(Sys.time()), longitude, latitude)
+{
+    ma <- moonAngle(t)#,  longitude=longitude, latitude=latitude)
+    sa <- sunAngle(t)# ,  longitude=longitude, latitude=latitude)
+    alpha <- sa$rightAscension
+    delta <- sa$declination
+    alphaPrime <- ma$rightAscension
+    deltaPrime <- ma$declination
+    numerator <- cos(delta) * sin(alpha - alphaPrime)
+    denominator <- cos(deltaPrime)*sin(delta) - sin(deltaPrime)*cos(delta)*cos(alpha - alphaPrime)
+    rpd <- pi / 180
+    cat("alphaPrime=", rpd*alphaPrime, "\n")
+    cat("deltaPrime=", rpd*deltaPrime, "\n")
+    cat("alpha=", rpd*alpha, "\n")
+    cat("delta=", rpd*delta, "\n")
+    atan2(numerator, denominator) * 180 / pi
+}
+
 #' Rotate vectors
 #'
 #' @param p numeric data frame with `x` and `y` coordinates.
