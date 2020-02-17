@@ -6,22 +6,40 @@
 #' @references
 #' * https://en.wikipedia.org/wiki/Position_of_the_Sun
 #' * http://www.jgiesen.de/elevaz/basics/meeus.htm
-moonRotationAngle <- function(t=as.POSIXct(Sys.time()), longitude, latitude)
+moonRotationAngle <- function(t, longitude, latitude)
 {
-    ma <- moonAngle(t)#,  longitude=longitude, latitude=latitude)
-    sa <- sunAngle(t)# ,  longitude=longitude, latitude=latitude)
-    alpha <- sa$rightAscension
-    delta <- sa$declination
-    alphaPrime <- ma$rightAscension
-    deltaPrime <- ma$declination
-    numerator <- cos(delta) * sin(alpha - alphaPrime)
-    denominator <- cos(deltaPrime)*sin(delta) - sin(deltaPrime)*cos(delta)*cos(alpha - alphaPrime)
-    rpd <- pi / 180
-    cat("alphaPrime=", rpd*alphaPrime, "\n")
-    cat("deltaPrime=", rpd*deltaPrime, "\n")
-    cat("alpha=", rpd*alpha, "\n")
-    cat("delta=", rpd*delta, "\n")
-    atan2(numerator, denominator) * 180 / pi
+    to360 <- function(x)
+    {
+        while(x < 0)
+            x <- x + 360
+        x
+    }
+    testCase <- t == as.POSIXct("1992-04-12 00:00:00", tz="UTC")
+    k <- pi / 180
+    sa <- sunAngle(t, longitude=longitude, latitude=latitude)
+    da <- sunDeclinationRightAscension(t, apparent=TRUE)
+    delta0 <- da$declination
+    alpha0 <- da$rightAscension
+    if (testCase) {
+        ## why do these not match up to all 4 digits after the decimal?
+        expect_equal(alpha0, 20.6579, tol=0.0004, scale=1)
+        expect_equal(delta0,  8.6964, tol=0.0003, scale=1)
+    }
+    ma <- moonAngle(t, longitude=longitude, latitude=latitude)
+    alpha <- ma$rightAscension
+    delta <- ma$declination
+    if (testCase) {
+        ## why do these not match so poorly?
+        expect_equal(alpha, 134.6885, tol=0.0200, scale=1)
+        expect_equal(delta,  13.7684, tol=0.0050, scale=1)
+    }
+    chi <- 1/k*atan2(cos(k*delta0) * sin(k*(alpha0-alpha)),
+                     sin(k*delta0)*cos(k*delta) - cos(k*delta0)*sin(k*delta)*cos(k*(alpha0-alpha)))
+    chi <- to360(chi)
+    if (testCase) {
+        expect_equal(chi, 285.0, tol=0.1, scale=1)
+    }
+    chi
 }
 
 #' Rotate vectors
@@ -82,11 +100,11 @@ drawMoon <- function(phase, angle=0,
         ifelse(x <= 180, x, x - 360)
     }
     ## orthographic projection
-    XY <- function(lon, lat, R=1)
+    XY <- function(longitude, latitude, R=1)
     {
-        lon <- to180(lon)
-        lambda <- pi * lon / 180
-        phi <- pi * lat / 180
+        longitude <- to180(longitude)
+        lambda <- pi * longitude / 180
+        phi <- pi * latitude / 180
         x <- R * cos(phi) * sin(lambda)
         y <- R * sin(phi)
         list(x=x, y=y)

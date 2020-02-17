@@ -1,4 +1,4 @@
-all: calendar_test.out
+all: calendars_2020_2030.out calendar_test.out
 %.out: %.R
 	R --no-save < $< @> $@
 clean: force

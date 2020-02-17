@@ -32,9 +32,17 @@ calendar <- function(year, month,
             plot(c(-1,1), c(-1,1), xlab="", ylab="", axes=FALSE, asp=1, type="n")
             box()
             par(new=TRUE)
+            chi <- moonRotationAngle(t, longitude=longitude, latitude=latitude)
             ma <- moonAngle(t, longitude=longitude, latitude=latitude)
-            drawMoon(ma$phase, lit=lit, shadow=shadow)
+            chi <- 90
+            drawMoon(ma$phase, lit=lit, shadow=shadow, angle=chi-90)
             text(0,0.6,format(t, "%a\n%b %d\n%Y"), pos=1, font=2)
+            text(0,0.9,sprintf("%.0f",chi),font=2,col=2)
+            ##?? par(xpd=NA)
+            ##?? points(-1, -1, col=3)
+            ##?? points(cos(-(chi-90)*pi/180), sin(-(chi-90)*pi/180), col=2)
+            ##?? #lines(c(-1, -1), c(-1+2*cos(chi*pi/180), -1+2*sin(chi*pi/180)),type="o")
+            ##?? stop()
         }
     }
 }
@@ -47,5 +55,6 @@ for (y in 2020:2030) {
         calendar(y, m, lit="#FFDC00", shadow="#AAAAAA")
         if (!interactive())
             dev.off()
+        stop()
     }
 }
