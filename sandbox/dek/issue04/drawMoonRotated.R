@@ -126,6 +126,7 @@ drawMoon <- function(phase, angle=0,
                      lit=rgb(200/255,150/255,10/255),
                      shadow=gray(0.5), # rgb(230/255,230/255,230/255),
                      text="",
+                     phaseFlip=FALSE,
                      write=FALSE)
 {
     ## orthographic projection
@@ -149,7 +150,7 @@ drawMoon <- function(phase, angle=0,
     lhs <- XY(rep(-90, length(lat)), rev(lat))
     rhs <- XY(rep(90, length(lat)), rev(lat))
     ## polygon p will be drawn with the 'lit' colo
-    if (phase > 0.5) {
+    if (phaseFlip && phase > 0.5) {
         xy <- XY(rep(-180 + shadowLongitude, length(lat)), lat)
         p <- data.frame(x=c(xy$x, lhs$x), y=c(xy$y, lhs$y))
     } else {

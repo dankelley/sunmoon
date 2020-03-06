@@ -52,21 +52,27 @@ mtext(format(t), adj=0, line=-0.5)
 mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
 mtext(paste0("angle=", round(angle,1)), adj=1, line=-1.5)
 mtext(paste0("lon=", lon, ", lat=", lat), adj=0, side=1, line=-0.5)
-stop()
 
-par(mfrow=c(5,7))
 
 # Observed Mar 2 at 10AM chi=-45 or so, bright on RHS, half moon
 # but the code says chi=-98 on that day.
-times <- seq(as.POSIXct("2020-03-01 14:00:00", tz="UTC"), by="day", length.out=31)
-for (itime in seq_along(times)) {
-    time <- times[itime]
-    chi <- moonRotationAngle(time, lon=lon, lat=lat)
-    ## convert to -180 to 180 form
-    chi <- ifelse(chi > 180, chi-360, chi)
-    ma <- moonAngle(time, longitude=lon, latitude=lat)
-    drawMoon(phase=ma$phase, angle=0) # chi-90)
-    mtext(format(time, "%b %d"), cex=0.7, line=-0.5)
-    text(0, 0, round(chi), font=2, cex=1.4, col="white")
+for (mo in 1:12) {
+    if (!interactive()) png(sprintf("mo%02d.png", mo))
+    par(mfrow=c(5,7))
+    par(mar=rep(0.5, 4))
+    times <- seq(as.POSIXct(sprintf("2020-%02d-01 12:00:00", mo), tz="UTC"), by="day", length.out=31)
+    for (itime in seq_along(times)) {
+        time <- times[itime]
+        chi <- moonRotationAngle(time, lon=lon, lat=lat)
+        ## convert to -180 to 180 form
+                                        #chi <- ifelse(chi > 180, chi-360, chi)
+        angle <- -(chi + 90) # my angle is going CW, not CCW as in math (test by putting angle=10)
+        angle <- to180(angle)
+        ma <- moonAngle(time, longitude=lon, latitude=lat)
+        drawMoon(phase=ma$phase, angle=angle)
+        mtext(format(time, "%b %d"), cex=0.7, line=-0.5)
+        text(0, 0, round(chi), font=2, cex=1.4, col="white")
+    }
+    if (!interactive()) dev.off()
 }
 
