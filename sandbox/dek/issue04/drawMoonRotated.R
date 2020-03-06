@@ -4,6 +4,14 @@ to180 <- function(x)
     ifelse(x <= 180, x, x - 360)
 }
 
+chi2angle <- function(chi)
+{
+    angle <- chi + 90
+    angle <- to180(angle)
+    angle
+}
+
+
 #' Moon rotation angle, from ch13 of Meeus book
 #'
 #' @param time
