@@ -1,3 +1,9 @@
+to180 <- function(x)
+{
+    x <- x %% 360
+    ifelse(x <= 180, x, x - 360)
+}
+
 #' Moon rotation angle, from ch13 of Meeus book
 #'
 #' @param time
@@ -68,7 +74,7 @@ moonRotationAngle <- function(t, lon, lat)
 ##OLD     atan2(numerator, denominator) * 180 / pi
 ##OLD }
 
-#' Rotate vectors
+#' Rotate vectors counter-clockwise
 #'
 #' @param p numeric data frame with `x` and `y` coordinates.
 #' @param angle numeric value giving the rotation angle in
@@ -89,7 +95,7 @@ rotateXY <- function(p, angle=0)
     y <- p$y
     xy <- cbind(x, y)
     angle <- angle * pi / 180
-    m <- cbind(c(cos(angle), sin(angle)), c(-sin(angle), cos(angle)))
+    m <- cbind(c(cos(angle), -sin(angle)), c(sin(angle), cos(angle)))
     xyr <- xy %*% m
     data.frame(x=xyr[,1], y=xyr[,2])
 }
@@ -122,10 +128,6 @@ drawMoon <- function(phase, angle=0,
                      text="",
                      write=FALSE)
 {
-    to180 <- function(x) {
-        x <- x %% 360
-        ifelse(x <= 180, x, x - 360)
-    }
     ## orthographic projection
     XY <- function(lon, lat, R=1)
     {

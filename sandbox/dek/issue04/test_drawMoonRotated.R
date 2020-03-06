@@ -40,14 +40,20 @@ t <-  lubridate::with_tz(Sys.time(), "UTC")
 ## moon 1/2 full, dark on left, arc rotated left 45deg
 t <- as.POSIXct("2020-03-02 14:00:00", tz="UTC")
 chi <- moonRotationAngle(t, lon=lon, lat=lat)
-chi <- ifelse(chi > 180, chi-360, chi)
+#chi <- ifelse(chi > 180, chi-360, chi)
 ma <- moonAngle(t, longitude=lon, latitude=lat)
 #chi <- 90
-drawMoon(phase=ma$phase, angle=chi-90)
+angle <- -(chi + 90) # my angle is going CW, not CCW as in math (test by putting angle=10)
+angle <- to180(angle)
+drawMoon(phase=ma$phase, angle=angle)
+lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
 IF <- ma$illuminatedFraction
 mtext(format(t), adj=0, line=-0.5)
 mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
+mtext(paste0("angle=", round(angle,1)), adj=1, line=-1.5)
 mtext(paste0("lon=", lon, ", lat=", lat), adj=0, side=1, line=-0.5)
+stop()
+
 par(mfrow=c(5,7))
 
 # Observed Mar 2 at 10AM chi=-45 or so, bright on RHS, half moon
