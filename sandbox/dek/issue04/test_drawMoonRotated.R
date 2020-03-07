@@ -64,7 +64,7 @@ for (mo in 3) {#1:12) {
     par(mfrow=c(5,7))
     par(mar=rep(0.5, 4))
     ## some websites (moongiant?) show phase at 12UTC, I think
-    times <- seq(as.POSIXct(sprintf("2020-%02d-01 12:00:00", mo), tz="UTC"), by="day", length.out=31)
+    times <- seq(as.POSIXct(sprintf("2020-%02d-01 00:00:00", mo), tz="UTC"), by="day", length.out=31)
     for (itime in seq_along(times)) {
         time <- times[itime]
         chi <- moonRotationAngle(time, lon=lon, lat=lat)
@@ -73,7 +73,7 @@ for (mo in 3) {#1:12) {
         drawMoon(phase=ma$phase, angle=angle)
         lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
         mtext(format(time, "%b %d"), cex=0.7, line=-0.5)
-        text(0, 0.2, round(chi), font=2, cex=1.4, col="white")
+        text(0, 0.2, to180(round(chi)), font=2, cex=1.4, col="white")
         text(0, -0.2, round(angle), font=2, cex=1.4, col="white")
     }
     if (!interactive()) dev.off()
