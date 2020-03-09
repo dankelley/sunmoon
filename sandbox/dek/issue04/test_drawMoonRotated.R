@@ -1,4 +1,19 @@
 rm(list=ls())
+tz <- "America/Halifax" # for display of local times
+showWork <- FALSE
+
+angles <- function(day=Sys.Date(), lon=-63.61, lat=44.67, sun=TRUE)
+{
+    t <- seq(as.POSIXct(paste(day, "04:00:00"), tz="UTC"), length.out=24*60, by="1 min")
+    a <- if (sun) sunAngle(t, lon=lon, lat=lat) else moonAngle(t, lon=lon, lat=lat)
+    #invisible <- a$altitude < 0
+    #a$altitude[invisible] <- NA
+    #a$azimuth[invisible] <- NA
+    list(t=t, altitude=a$altitude, azimuth=a$azimuth)
+}
+
+
+
 #setwd('~/git/sunmoon/sandbox/dek/issue04/angle.R')
 
 #' Convert astronomical angle in degrees to hours, minutes, and seconds
@@ -86,39 +101,71 @@ ma <- moonAngle(t, longitude=lon, latitude=lat)
 angle <- chiq2angle(chi, q)
 par(mfrow=c(1,1))
 drawMoon(phase=ma$phase, angle=angle)
-lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
-IF <- ma$illuminatedFraction
-mtext(format(t), adj=0, line=-0.5)
-mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
-mtext(paste0("angle=", round(angle,1)), adj=1, line=-1.5)
-mtext(paste0("lon=", lon, ", lat=", lat), adj=0, side=1, line=-0.5)
-text(0, 0.2, round(chi), font=2, cex=1.4, col="white")
-text(0, -0.2, round(angle), font=2, cex=1.4, col="white")
+if (showWork) {
+    lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
+    mtext(format(t), adj=0, line=-0.5)
+    mtext(paste0("chi=", round(chi,1), ", IF=",round(100*IF), "%"), adj=1, line=-0.5)
+    mtext(paste0("angle=", round(angle,1)), adj=1, line=-1.5)
+    mtext(paste0("lon=", lon, ", lat=", lat), adj=0, side=1, line=-0.5)
+    text(0, 0.2, round(chi), font=2, cex=1.4, col="white")
+    text(0, -0.2, round(angle), font=2, cex=1.4, col="white")
+}
 
 
 # Observed Mar 2 at 10AM chi=-45 or so, bright on RHS, half moon
 # but the code says chi=-98 on that day.
-
+year <- 2020
 for (mo in 3) {#1:12) {
-    if (!interactive()) png(sprintf("mo%02d.png", mo), res=120, pointsize=9,
+    if (!interactive()) png(sprintf("mo%02d.png", mo), res=150, pointsize=9,
                             width=5, height=5, unit="in")
-    par(mfrow=c(5,7))
-    par(mar=rep(0.25, 4))
+    par(mfrow=c(5, 7), mar=rep(0.25, 4))
     ## some websites (moongiant?) show phase at 12UTC, I think
     times <- seq(as.POSIXct(sprintf("2020-%02d-01 00:00:00", mo), tz="UTC"), by="day", length.out=31)
+    weekDay <- lubridate::wday(ISOdatetime(year, mo, 1, 12, 0, 0, tz="UTC"))
+    ## blank out some days to get Monday etc
+    if (weekDay < 8) {
+        for (d in seq_len(weekDay-1)) {
+            plot(c(-1,1), c(-1,1), xlab="", ylab="", axes=FALSE, asp=1, type="n")
+        }
+    }
     for (itime in seq_along(times)) {
+        ##message(itime)
         time <- times[itime]
+        angleSun <- angles(times[itime], sun=TRUE)
+        angleMoon <- angles(times[itime], sun=FALSE)
+        ##
+        moonBelowHorizon <- angleMoon$altitude < 0
+        ##par(mar=c(3,3,1,1), mgp=c(2,0.7,0))
+        ##plot(angleMoon$tlocal, angleMoon$altitude)
+        ##plot(angleMoon$tlocal, c(0,diff(moonBelowHorizon)))
+        iMoonRise <- 1 + which(diff(moonBelowHorizon) == -1)[1]
+        if (is.finite(iMoonRise)) {
+            moonriseTime <- angleMoon$t[iMoonRise]
+            moonriseAltitude <- angleMoon$altitude[iMoonRise]
+            ##plot(angleMoon$tlocal, angleMoon$altitude)
+            ##abline(v=angleMoon$tlocal[iMoonRise])
+            moonriseAzimuth <- angleMoon$azimuth[iMoonRise]
+        }
         mra <- moonRotationAngle(time, lon=lon, lat=lat)
         chi <- mra$chi
         q <- mra$q
         angle <- chiq2angle(chi, q)
         ma <- moonAngle(time, longitude=lon, latitude=lat)
         drawMoon(phase=ma$phase, angle=angle)
-        lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
-        mtext(format(time, "%b %d"), cex=0.7, line=-1.4)
-        text(0, 0.4, to180(round(chi)), font=2, cex=1, col="white")
-        text(0, 0, to180(round(q)), font=2, cex=1, col="white")
-        text(0, -0.4, round(angle), font=2, cex=1, col="white")
+        if (showWork)
+            lines(c(0, cos(angle*pi/180)), c(0, sin(angle*pi/180)))
+        mtext(format(time, "%a %b %d"), cex=0.7, line=-1.4)
+        if (showWork) {
+            text(0, 0.4, to180(round(chi)), font=2, cex=1, col="white")
+            text(0, 0, to180(round(q)), font=2, cex=1, col="white")
+            text(0, -0.4, round(angle), font=2, cex=1, col="white")
+        }
+        if (is.finite(iMoonRise)) {
+            ##mtext(paste0(format(lubridate::with_tz(moonriseTime, tz), "Rise %I:%M%p"),
+            ##             " [azi ", round(moonriseAzimuth), "]"), cex=0.7, line=-1.4, side=1)
+            mtext(paste0(format(lubridate::with_tz(moonriseTime, tz), "%I:%M%p"),
+                         " @ ", round(moonriseAzimuth)), cex=0.7, line=-1.4, side=1)
+        }
     }
     if (!interactive()) dev.off()
 }
