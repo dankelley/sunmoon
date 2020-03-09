@@ -4,11 +4,10 @@ to180 <- function(x)
     ifelse(x <= 180, x, x - 360)
 }
 
-chi2angle <- function(chi)
+chiq2angle <- function(chi, q)
 {
-    angle <- chi + 90
-    angle <- to180(angle)
-    angle
+    to180(chi - q + 90)
+    to180(chi + q + 90)
 }
 
 
@@ -53,34 +52,12 @@ moonRotationAngle <- function(t, lon, lat)
     if (testCase) {
         expect_equal(chi, 285.0, tol=0.1, scale=1)
     }
-    chi
+    ## q is parallactic angle (ch 13 of Meeus 1991 pdf p101) at horizon
+    phi <- lat
+    delta <- ma$declination
+    q <- 180/pi*acos(sin(phi*pi/180) / cos(delta*pi/180))
+    list(chi=chi, q=q)
 }
-
-##OLD #' Moon rotation angle, from ch13 of Meeus book
-##OLD #'
-##OLD #' @param time
-##OLD #' @param longitude
-##OLD #' @param latitude
-##OLD #' @references
-##OLD #' * https://en.wikipedia.org/wiki/Position_of_the_Sun
-##OLD #' * http://www.jgiesen.de/elevaz/basics/meeus.htm
-##OLD moonRotationAngleOldNotUsedAnymore <- function(t=as.POSIXct(Sys.time()), longitude, latitude)
-##OLD {
-##OLD     ma <- moonAngle(t)#,  longitude=longitude, latitude=latitude)
-##OLD     sa <- sunAngle(t)# ,  longitude=longitude, latitude=latitude)
-##OLD     alpha <- sa$rightAscension
-##OLD     delta <- sa$declination
-##OLD     alphaPrime <- ma$rightAscension
-##OLD     deltaPrime <- ma$declination
-##OLD     numerator <- cos(delta) * sin(alpha - alphaPrime)
-##OLD     denominator <- cos(deltaPrime)*sin(delta) - sin(deltaPrime)*cos(delta)*cos(alpha - alphaPrime)
-##OLD     rpd <- pi / 180
-##OLD     cat("alphaPrime=", rpd*alphaPrime, "\n")
-##OLD     cat("deltaPrime=", rpd*deltaPrime, "\n")
-##OLD     cat("alpha=", rpd*alpha, "\n")
-##OLD     cat("delta=", rpd*delta, "\n")
-##OLD     atan2(numerator, denominator) * 180 / pi
-##OLD }
 
 #' Rotate vectors counter-clockwise
 #'
