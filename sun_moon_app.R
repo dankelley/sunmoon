@@ -17,7 +17,8 @@ Resolute, Canada;-94.83;74.70;America/Resolute
 San Francisco;-122.3973;37.8030;America/Los_Angeles
 Aranuka Atoll;-173.6295;0.1905;Pacific/Tarawa
 Chuuk, FSM;-151.8470;7.4467;Pacific/Chuuk
-Tok, Alaska;-142.9856;63.3367;America/Anchorage"
+Tok, Alaska;-142.9856;63.3367;America/Anchorage
+Saavedra, Chile;-73.4;-38.78306;America/Santiago"
 locations <- read.delim(text=locationsText, sep=";", header=TRUE, stringsAsFactors=FALSE)
 locations <- locations[order(locations$name),]
 halifax <- grep("Halifax, Canada", locations$name)
@@ -57,6 +58,7 @@ server <- function(input, output) {
         w <- which(input$location == locations$name)
         lon <- locations$lon[w]
         lat <- locations$lat[w]
+        ## message("location ", lat, "N, ", lon, "E")
         m <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat[w], sun=FALSE)
         s <- angles(day=day, tz=locations$tz[w], lon=locations$lon[w], lat=locations$lat[w], sun=TRUE)
         par(mar=rep(0.5, 4))
@@ -77,6 +79,7 @@ server <- function(input, output) {
         ## Moon trace
         mx <- (90 - m$altitude) / 90 * cos(pi / 180 * (90 - m$azimuth))
         my <- (90 - m$altitude) / 90 * sin(pi / 180 * (90 - m$azimuth))
+        DANmoon<<-data.frame(mx=mx,my=my)
         lines(mx, my, col=colMoon, lwd=4)
         ## Moon labels
         mlt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[w])
@@ -88,6 +91,7 @@ server <- function(input, output) {
         ## Sun trace
         sx <- (90 - s$altitude) / 90 *  cos(pi / 180 * (90 - s$azimuth))
         sy <- (90 - s$altitude) / 90 *  sin(pi / 180 * (90 - s$azimuth))
+        DANsun<<-data.frame(sx=sx,sy=sy)
         lines(sx, sy, col=colSun, lwd=4)
         ## Sun labels
         slt <- as.POSIXct(sprintf("%s %02d:00:00", day, 1:23), tz=locations$tz[w])
@@ -132,8 +136,11 @@ server <- function(input, output) {
             }
             ## Equinox
             sunriseAzimuth <- s$azimuth[head(which(is.finite(s$azimuth)), 1)]
+            ## message("next is sunriseAzimuth:");print(sunriseAzimuth)
             sunsetAzimuth <- s$azimuth[tail(which(is.finite(s$azimuth)), 1)]
+            ## message("next is sunsetAzimuth:");print(sunsetAzimuth)
             dev <- 0.5 * (abs(sunriseAzimuth-90) + abs(sunsetAzimuth-270))
+            ## message("next is dev:");print(dev)
             if (dev < 0.3)
                 mtext("Equinox", side=3, adj=1, line=-4, font=2)
             if (debug) {
