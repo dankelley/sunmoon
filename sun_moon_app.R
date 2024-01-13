@@ -27,14 +27,14 @@ year0 <- as.integer(format(Sys.Date(), "%Y"))
 day0 <- as.integer(format(Sys.Date(), "%j"))
 
 ui <- pageWithSidebar(headerPanel(h4("Sun and moon sky traces")),
-                      sidebarPanel(sliderInput("yearOffset",
-                                               "Year Offset", min=-65, max=5, value=0, step=1),
-                                   sliderInput("dayOfYear",
-                                               "Day of Year", min=1, max=366, value=day0, step=1),
-                                   selectInput("location",
-                                               "Location", choices=locations$name, selected=locations$name[halifax]),
-                                   width=4),
-                      mainPanel(plotOutput("sunMoonPlot")))
+    sidebarPanel(sliderInput("yearOffset",
+            "Year Offset", min=-65, max=5, value=0, step=1),
+        sliderInput("dayOfYear",
+            "Day of Year", min=1, max=366, value=day0, step=1),
+        selectInput("location",
+            "Location", choices=locations$name, selected=locations$name[halifax]),
+        width=4),
+    mainPanel(plotOutput("sunMoonPlot")))
 
 server <- function(input, output) {
     output$sunMoonPlot <- renderPlot({
